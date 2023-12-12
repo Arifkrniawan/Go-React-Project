@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import Alert from "./component/form/Alert";
 
@@ -13,6 +13,26 @@ function App() {
     setJwt("");
     navigate("/login");
   };
+
+  useEffect(() => {
+    if (jwt === "") {
+      const requestOption = {
+        method: "GET",
+        credentials: "include",
+      };
+
+      fetch(`/refresh`, requestOption)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.access_token) {
+            setJwt(data.access_token);
+          }
+        })
+        .catch((error) => {
+          console.log("Couldn't get token");
+        });
+    }
+  }, [jwt]);
 
   return (
     <>
@@ -79,10 +99,9 @@ function App() {
             </nav>
           </div>
           <div className="col-md-10">
-            <Alert className={className} message={alertMsg} />
+            <Alert className={[className]} message={[alertMsg]} />
             <Outlet
               context={{
-                jwt,
                 setJwt,
                 setClassName,
                 setAlertMsg,

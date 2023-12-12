@@ -1,65 +1,84 @@
 import { useState } from "react";
-import Input from "./form/Input";
 import { useNavigate, useOutletContext } from "react-router-dom";
-
+import Input from "./form/Input";
 
 const Login = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const { setJwt } = useOutletContext();
-    const { setAlertMsg } = useOutletContext();
-    const { setClassName } = useOutletContext();
+  const { setJwt } = useOutletContext();
+  const { setClassName } = useOutletContext();
+  const { setAlertMsg } = useOutletContext();
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleSubmit = (e) =>{
-        e.preventDefault();
-        console.log(email, password)
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
+    // build the request payload
+    let payload = {
+      email: email,
+      password: password,
+    };
 
-        if (email === "admin@example.com"){
-            setJwt("abc");
-            setClassName("d-none");
-            setAlertMsg("");
-            navigate("/")
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    };
+
+    fetch(`/authenticate`, requestOptions)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          setClassName("alert-danger");
+          setAlertMsg(data.message);
         } else {
-            setAlertMsg("Incorrect Email or Password")
-            setClassName("alert-danger")
+          setJwt(data.access_token);
+          setClassName("d-none");
+          setAlertMsg("");
+          navigate("/");
         }
-    }
-    return (
-        <div className="col-md-6 offset-md-3">
-            <h2>Login</h2>
-            <hr/>
-            <form onSubmit={handleSubmit}>
-                <Input
-                id="email"
-                title="Email Address"
-                type="email"
-                className="form-control"
-                placeholder="your email"
-                onChange={(e)=> setEmail(e.target.value)}
-                autoComplete="email-new"
-                name="email"/>
-
-                <Input
-                id="password"
-                title="Password"
-                type="input"
-                className="form-control"
-                placeholder="your password"
-                onChange={(e)=> setPassword(e.target.value)}
-                autoComplete="on"
-                name="password"/>
-
-                <input className="btn btn-primary" type="submit" value="Login"/>
-                
-
-            </form>
-        </div>
-    );
+      })
+      .catch((error) => {
+        setClassName("alert-danger");
+        setAlertMsg(error.message);
+      });
   };
-  
-  export default Login;
-  
+
+  return (
+    <div className="col-md-6 offset-md-3">
+      <h2>Login</h2>
+      <hr />
+
+      <form onSubmit={handleSubmit}>
+        <Input
+          title="Email Address"
+          type="email"
+          className="form-control"
+          name="email"
+          autoComplete="email-new"
+          onChange={(event) => setEmail(event.target.value)}
+        />
+
+        <Input
+          title="Password"
+          type="password"
+          className="form-control"
+          name="password"
+          autoComplete="password-new"
+          onChange={(event) => setPassword(event.target.value)}
+        />
+
+        <hr />
+
+        <input type="submit" className="btn btn-primary" value="Login" />
+      </form>
+    </div>
+  );
+};
+
+export default Login;
