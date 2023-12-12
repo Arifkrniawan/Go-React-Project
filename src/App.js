@@ -10,8 +10,21 @@ function App() {
   const navigate = useNavigate();
 
   const logout = () => {
-    setJwt("");
+    const requestOptions = {
+      method: "GET",
+      credentials: "include",
+    }
+
+    fetch(`/logout`, requestOptions)
+    .catch(error => {
+      console.log("error logging out", error)
+    })
+    .finally(()=>{
+      setJwt("")
+    });
+
     navigate("/login");
+
   };
 
   useEffect(() => {
@@ -21,16 +34,17 @@ function App() {
         credentials: "include",
       };
 
-      fetch(`/refresh`, requestOption)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.access_token) {
-            setJwt(data.access_token);
-          }
-        })
-        .catch((error) => {
-          console.log("Couldn't get token");
-        });
+    fetch(`/refresh`, requestOption)
+      .then((response) => response.json())
+      .then((data) => {
+         if (data.access_token) {
+           setJwt(data.access_token);
+           console.log(data);
+        }
+       })
+       .catch((error) => {
+        console.log("Couldn't get token", error);
+       })
     }
   }, [jwt]);
 
