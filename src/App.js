@@ -7,6 +7,9 @@ function App() {
   const [alertMsg, setAlertMsg] = useState("");
   const [className, setClassName] = useState("d-none");
 
+  const [ticking, setTicking] = useState(false);
+  const [tickingInterval, setTickingInterval] = useState();
+
   const navigate = useNavigate();
 
   const logout = () => {
@@ -34,19 +37,55 @@ function App() {
         credentials: "include",
       };
 
-    fetch(`/refresh`, requestOption)
-      .then((response) => response.json())
-      .then((data) => {
-         if (data.access_token) {
-           setJwt(data.access_token);
-           console.log(data);
+      fetch(`/refresh`, requestOption)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok.");
         }
-       })
-       .catch((error) => {
+        return response.text(); // Get response as text
+      })
+      .then((data) => {
+        if (data) {
+          try {
+            const jsonData = JSON.parse(data); // Parse response as JSON
+            if (jsonData.access_token) {
+              setJwt(jsonData.access_token);
+              console.log(jsonData);
+            } else {
+              console.log("No access_token in response data");
+            }
+          } catch (error) {
+            console.log("Error parsing JSON:", error);
+          }
+        } else {
+          console.log("Empty response received");
+        }
+      })
+      .catch((error) => {
         console.log("Couldn't get token", error);
-       })
+      });
     }
   }, [jwt]);
+
+  const toogleRefersh = () => {
+    console.log("clicked")
+    
+    if (!ticking){
+        console.log("turning on ticking")
+        let i = setInterval(() =>{
+          console.log("this will run every second")
+        },1000)
+        setTickingInterval(i);
+        console.log("setting tick interval to ", i);
+        setTicking(true)
+    } else {
+        console.log("turning off ticking");
+        console.log("turning off ticking interval", tickingInterval);
+        setTickingInterval(null);
+        clearInterval(tickingInterval);
+        setTicking(false);
+    }
+  }
 
   return (
     <>
@@ -113,6 +152,7 @@ function App() {
             </nav>
           </div>
           <div className="col-md-10">
+          <a className="btn btn-outline-secondary" href="#!" onClick={toogleRefersh}>toggle Ticking</a>
             <Alert className={[className]} message={[alertMsg]} />
             <Outlet
               context={{
