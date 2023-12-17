@@ -13,7 +13,7 @@ const Movies = () => {
       headers: headers,
     };
 
-    fetch(`http://localhost:8080/movies`, requestOption)
+    fetch(`/movies`, requestOption)
       .then((response) => response.json())
       .then((data) => {
         setMovies(data);

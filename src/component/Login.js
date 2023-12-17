@@ -9,6 +9,7 @@ const Login = () => {
   const { setJwt } = useOutletContext();
   const { setClassName } = useOutletContext();
   const { setAlertMsg } = useOutletContext();
+  const { toogleRefersh } = useOutletContext();
 
   const navigate = useNavigate();
 
@@ -41,6 +42,7 @@ const Login = () => {
           setClassName("d-none");
           setAlertMsg("");
           navigate("/");
+          toogleRefersh(true);
         }
       })
       .catch((error) => {
